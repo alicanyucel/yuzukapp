@@ -8,8 +8,10 @@
 /* Header için üst boşluk */
 .main-content {
   margin-top: 64px; /* Header yüksekliği kadar */
-  min-height: calc(100vh - 64px - 400px); /* Header ve footer arası alan */
-  padding: 20px;
+  min-height: calc(100vh - 64px - 80px); /* Header ve footer arası alan, footer 80px varsayım */
+  padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Router outlet içeriği */

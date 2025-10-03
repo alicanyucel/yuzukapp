@@ -9,6 +9,68 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
+  private ringModel: any = null;
+
+  // === Filter action functions for right panel ===
+  changeMetalColor(color: string) {
+    this.state.metalColor = color;
+    if (!this.ringModel) return;
+    this.ringModel.traverse((obj: any) => {
+      if (obj.isMesh && obj.material && obj.material.metalness !== undefined) {
+        obj.material.color.set(color === 'Platinum' ? '#e5e4e2' : color === '14k Rose' ? '#b76e79' : color === '18k Rose' ? '#c08081' : '#eaeaea');
+      }
+    });
+  }
+
+  changeDiamondType(type: string) {
+    this.state.diamondType = type;
+    if (!this.ringModel) return;
+    this.ringModel.traverse((obj: any) => {
+      if (obj.isMesh && obj.material && obj.material.metalness === undefined) {
+        obj.material.color.set(type === 'Lab Grown' ? '#b9f2ff' : '#ffffff');
+      }
+    });
+  }
+
+  changeBasket(type: string) {
+    this.state.basket = type;
+    if (!this.ringModel) return;
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.includes('Basket')) {
+        obj.visible = (type !== 'None');
+      }
+    });
+  }
+
+  changeProngs(count: string) {
+    this.state.prongs = count;
+    if (!this.ringModel) return;
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.includes('Prong')) {
+        obj.visible = (obj.name.includes(count.split(' ')[0]));
+      }
+    });
+  }
+
+  changeBandStyle(style: string) {
+    this.state.bandStyle = style;
+    if (!this.ringModel) return;
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.includes('Band')) {
+        obj.scale.x = style === 'Square' ? 1.2 : 1.0;
+      }
+    });
+  }
+
+  changeRingSize(size: number) {
+    this.state.ringSize = size;
+    if (!this.ringModel) return;
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.includes('Ring')) {
+        obj.scale.set(size / 6, size / 6, size / 6);
+      }
+    });
+  }
   @ViewChild('threeContainer', { static: false }) threeContainer!: ElementRef<HTMLDivElement>;
 
   // Three.js essentials
@@ -117,12 +179,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     const loader = new GLTFLoader();
     // Pick a ring model from assets
     const url = 'assets/kendin-yap-fe/public/assets/models/source/the_ring_1_carat.glb';
-
     loader.load(
       url,
       (gltf: any) => {
-        const model = gltf.scene;
-        model.traverse((obj: any) => {
+        this.ringModel = gltf.scene;
+        this.ringModel.traverse((obj: any) => {
           if (obj.isMesh) {
             obj.castShadow = true;
             obj.receiveShadow = true;
@@ -133,10 +194,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             }
           }
         });
-
-        model.scale.set(1, 1, 1);
-        model.position.set(0, -0.6, 0);
-        this.scene.add(model);
+        this.ringModel.scale.set(1, 1, 1);
+        this.ringModel.position.set(0, -0.6, 0);
+        this.scene.add(this.ringModel);
       },
       undefined,
       (err: any) => {

@@ -1,11 +1,12 @@
-<section class="home home-layout">
-  <!-- Main content (left) -->
-  <div class="content">
- 
-    <div class="preview">
-      <div class="three-container" #threeContainer aria-label="3D Ring Viewer"></div>
+<section class="home">
+  <div class="home-layout">
+    <!-- Main content (left) -->
+    <div class="content">
+      <div class="preview">
+        <div class="three-container" #threeContainer aria-label="3D Ring Viewer"></div>
+      </div>
     </div>
-  </div>
+
 
   <!-- Filters (right) -->
   <aside class="filters">
@@ -19,12 +20,12 @@
         <div class="group">
           <div class="group-title">Head & Band Color</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('metalColor','14k White')" (click)="select('metalColor','14k White')">14k White</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','18k White')" (click)="select('metalColor','18k White')">18k White</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','14k Rose')" (click)="select('metalColor','14k Rose')">14k Rose</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','18k Rose')" (click)="select('metalColor','18k Rose')">18k Rose</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','Platinum')" (click)="select('metalColor','Platinum')">Platinum</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','Mixed')" (click)="select('metalColor','Mixed')">Mixed</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','14k White')" (click)="changeMetalColor('14k White')">14k White</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','18k White')" (click)="changeMetalColor('18k White')">18k White</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','14k Rose')" (click)="changeMetalColor('14k Rose')">14k Rose</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','18k Rose')" (click)="changeMetalColor('18k Rose')">18k Rose</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','Platinum')" (click)="changeMetalColor('Platinum')">Platinum</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','Mixed')" (click)="changeMetalColor('Mixed')">Mixed</button>
           </div>
         </div>
       </div>
@@ -57,9 +58,9 @@
         <div class="group">
           <div class="group-title">Diamond Type</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="select('diamondType','Natural')">Natural</button>
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="select('diamondType','Lab Grown')">Lab Grown</button>
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="select('diamondType','Skip')">Skip</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="changeDiamondType('Natural')">Natural</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="changeDiamondType('Lab Grown')">Lab Grown</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="changeDiamondType('Skip')">Skip</button>
           </div>
         </div>
       </div>
@@ -75,19 +76,19 @@
         <div class="group">
           <div class="group-title">Basket & Halo</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('basket','None')" (click)="select('basket','None')">None</button>
-            <button class="btn-option" [class.selected]="isSelected('basket','Basket')" (click)="select('basket','Basket')">Basket</button>
-            <button class="btn-option" [class.selected]="isSelected('basket','Halo')" (click)="select('basket','Halo')">Halo</button>
-            <button class="btn-option" [class.selected]="isSelected('basket','Hidden Halo')" (click)="select('basket','Hidden Halo')">Hidden Halo</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','None')" (click)="changeBasket('None')">None</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','Basket')" (click)="changeBasket('Basket')">Basket</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','Halo')" (click)="changeBasket('Halo')">Halo</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','Hidden Halo')" (click)="changeBasket('Hidden Halo')">Hidden Halo</button>
           </div>
         </div>
 
         <div class="group">
           <div class="group-title">Prong Count</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('prongs','4 Prong')" (click)="select('prongs','4 Prong')">4 Prong</button>
-            <button class="btn-option" [class.selected]="isSelected('prongs','6 Prong')" (click)="select('prongs','6 Prong')">6 Prong</button>
-            <button class="btn-option" [class.selected]="isSelected('prongs','4 Compass')" (click)="select('prongs','4 Compass')">4 Compass</button>
+            <button class="btn-option" [class.selected]="isSelected('prongs','4 Prong')" (click)="changeProngs('4 Prong')">4 Prong</button>
+            <button class="btn-option" [class.selected]="isSelected('prongs','6 Prong')" (click)="changeProngs('6 Prong')">6 Prong</button>
+            <button class="btn-option" [class.selected]="isSelected('prongs','4 Compass')" (click)="changeProngs('4 Compass')">4 Compass</button>
           </div>
         </div>
 
@@ -120,8 +121,8 @@
         <div class="group">
           <div class="group-title">Style</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('bandStyle','Round')" (click)="select('bandStyle','Round')">Round</button>
-            <button class="btn-option" [class.selected]="isSelected('bandStyle','Square')" (click)="select('bandStyle','Square')">Square</button>
+            <button class="btn-option" [class.selected]="isSelected('bandStyle','Round')" (click)="changeBandStyle('Round')">Round</button>
+            <button class="btn-option" [class.selected]="isSelected('bandStyle','Square')" (click)="changeBandStyle('Square')">Square</button>
           </div>
         </div>
 
@@ -144,7 +145,7 @@
         <div class="group">
           <div class="group-title">Ring Size (US)</div>
           <div class="range">
-            <input type="range" min="3" max="13" step="0.5" [value]="state.ringSize" (input)="state.ringSize = $any($event.target).value"/>
+            <input type="range" min="3" max="13" step="0.5" [value]="state.ringSize" (input)="changeRingSize($any($event.target).value)"/>
             <div class="range-values">{{ state.ringSize }}</div>
           </div>
         </div>
@@ -159,4 +160,5 @@
       </div>
     </div>
   </aside>
+</div>
 </section>
