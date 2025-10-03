@@ -1,0 +1,13 @@
+/* Ana sayfa düzeni */
+:host {
+  display: block;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Router outlet içeriği */
+router-outlet {
+  display: block;
+}
+
+/* Footer artık fixed position'da, ek stil gereksiz */
