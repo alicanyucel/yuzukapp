@@ -5,9 +5,14 @@
   position: relative;
 }
 
+/* Header için üst boşluk */
+.main-content {
+  margin-top: 64px; /* Header yüksekliği kadar */
+  min-height: calc(100vh - 64px - 400px); /* Header ve footer arası alan */
+  padding: 20px;
+}
+
 /* Router outlet içeriği */
 router-outlet {
   display: block;
 }
-
-/* Footer artık fixed position'da, ek stil gereksiz */

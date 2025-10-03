@@ -1,11 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Body'ye footer için padding ekle */
+/* Body'ye header ve footer için padding ekle */
 body {
   margin: 0;
   padding: 0;
+  padding-top: 64px; /* Header yüksekliği kadar alan bırak */
   padding-bottom: 400px; /* Footer yüksekliği kadar alan bırak */
   box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 html {
