@@ -23,6 +23,14 @@
 	color: #666;
 }
 
+.three-container {
+	height: 520px;
+	border-radius: 12px;
+	background: radial-gradient(circle at 50% 20%, #ffffff 0%, #f2f3f7 40%, #e8eaf4 100%);
+	border: 1px solid #eceefe;
+	overflow: hidden;
+}
+
 /* Filters Panel */
 .filters {
 	position: sticky;
