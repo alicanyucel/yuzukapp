@@ -1,13 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { SignComponent } from './sign/sign.component';
+import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/sign', pathMatch: 'full' },
-  { path: 'sign', component: SignComponent },
-  { path: 'login', component: SignComponent },
-  { path: 'register', component: SignComponent },
-  { path: '**', redirectTo: '/sign' }
+  { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({

@@ -1,0 +1,162 @@
+<section class="home home-layout">
+  <!-- Main content (left) -->
+  <div class="content">
+ 
+    <div class="preview">
+      <div class="preview-box">Ring preview will appear here</div>
+    </div>
+  </div>
+
+  <!-- Filters (right) -->
+  <aside class="filters">
+    <!-- Metal -->
+    <div class="filter-card">
+      <button class="card-header" (click)="toggle('metal')">
+        <span>Metal</span>
+        <span class="chev" [class.open]="expanded['metal']">▾</span>
+      </button>
+      <div class="card-body" *ngIf="expanded['metal']">
+        <div class="group">
+          <div class="group-title">Head & Band Color</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('metalColor','14k White')" (click)="select('metalColor','14k White')">14k White</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','18k White')" (click)="select('metalColor','18k White')">18k White</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','14k Rose')" (click)="select('metalColor','14k Rose')">14k Rose</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','18k Rose')" (click)="select('metalColor','18k Rose')">18k Rose</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','Platinum')" (click)="select('metalColor','Platinum')">Platinum</button>
+            <button class="btn-option" [class.selected]="isSelected('metalColor','Mixed')" (click)="select('metalColor','Mixed')">Mixed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diamonds -->
+    <div class="filter-card">
+      <button class="card-header" (click)="toggle('diamonds')">
+        <span>Diamonds</span>
+        <span class="chev" [class.open]="expanded['diamonds']">▾</span>
+      </button>
+      <div class="card-body" *ngIf="expanded['diamonds']">
+        <div class="group">
+          <div class="group-title">Carat Size</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('caratSize','One Stone')" (click)="select('caratSize','One Stone')">One Stone</button>
+            <button class="btn-option" [class.selected]="isSelected('caratSize','Two Stone')" (click)="select('caratSize','Two Stone')">Two Stone</button>
+            <button class="btn-option" [class.selected]="isSelected('caratSize','Three Stone')" (click)="select('caratSize','Three Stone')">Three Stone</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Select/Resize Shape</div>
+          <div class="range">
+            <input type="range" min="0" max="100" [value]="state.shape" (input)="state.shape = $any($event.target).value"/>
+            <div class="range-values">{{ state.shape }}</div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Diamond Type</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="select('diamondType','Natural')">Natural</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="select('diamondType','Lab Grown')">Lab Grown</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="select('diamondType','Skip')">Skip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Head -->
+    <div class="filter-card">
+      <button class="card-header" (click)="toggle('head')">
+        <span>Head</span>
+        <span class="chev" [class.open]="expanded['head']">▾</span>
+      </button>
+      <div class="card-body" *ngIf="expanded['head']">
+        <div class="group">
+          <div class="group-title">Basket & Halo</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('basket','None')" (click)="select('basket','None')">None</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','Basket')" (click)="select('basket','Basket')">Basket</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','Halo')" (click)="select('basket','Halo')">Halo</button>
+            <button class="btn-option" [class.selected]="isSelected('basket','Hidden Halo')" (click)="select('basket','Hidden Halo')">Hidden Halo</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Prong Count</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('prongs','4 Prong')" (click)="select('prongs','4 Prong')">4 Prong</button>
+            <button class="btn-option" [class.selected]="isSelected('prongs','6 Prong')" (click)="select('prongs','6 Prong')">6 Prong</button>
+            <button class="btn-option" [class.selected]="isSelected('prongs','4 Compass')" (click)="select('prongs','4 Compass')">4 Compass</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Prong Tips</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('prongTips','Rounded')" (click)="select('prongTips','Rounded')">Rounded</button>
+            <button class="btn-option" [class.selected]="isSelected('prongTips','Claw')" (click)="select('prongTips','Claw')">Claw</button>
+            <button class="btn-option" [class.selected]="isSelected('prongTips','Knife')" (click)="select('prongTips','Knife')">Knife</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Prong Pave</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('prongPave','None')" (click)="select('prongPave','None')">None</button>
+            <button class="btn-option" [class.selected]="isSelected('prongPave','Pave')" (click)="select('prongPave','Pave')">Pave</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Band -->
+    <div class="filter-card">
+      <button class="card-header" (click)="toggle('band')">
+        <span>Band</span>
+        <span class="chev" [class.open]="expanded['band']">▾</span>
+      </button>
+      <div class="card-body" *ngIf="expanded['band']">
+        <div class="group">
+          <div class="group-title">Style</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('bandStyle','Round')" (click)="select('bandStyle','Round')">Round</button>
+            <button class="btn-option" [class.selected]="isSelected('bandStyle','Square')" (click)="select('bandStyle','Square')">Square</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Cathedral</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('cathedral','None')" (click)="select('cathedral','None')">None</button>
+            <button class="btn-option" [class.selected]="isSelected('cathedral','Cathedral')" (click)="select('cathedral','Cathedral')">Cathedral</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Band Width</div>
+          <div class="range">
+            <input type="range" min="1" max="7" step="0.1" [value]="state.bandWidth" (input)="state.bandWidth = $any($event.target).value"/>
+            <div class="range-values">{{ state.bandWidth }} mm</div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Ring Size (US)</div>
+          <div class="range">
+            <input type="range" min="3" max="13" step="0.5" [value]="state.ringSize" (input)="state.ringSize = $any($event.target).value"/>
+            <div class="range-values">{{ state.ringSize }}</div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">Fit</div>
+          <div class="options">
+            <button class="btn-option" [class.selected]="isSelected('fit','ComfortFit')" (click)="select('fit','ComfortFit')">ComfortFit</button>
+            <button class="btn-option" [class.selected]="isSelected('fit','StandardFit')" (click)="select('fit','StandardFit')">StandardFit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</section>
