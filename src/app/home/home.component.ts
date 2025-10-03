@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import * as THREE from 'three';
+import { Texture } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -9,6 +10,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
+  // Asset images for model modification
+  galleryImages: string[] = [
+    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07323.JPG',
+    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07326.JPG',
+    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07332.JPG'
+  ];
   private ringModel: any = null;
 
   // === Filter action functions for right panel ===
@@ -80,11 +87,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private controls!: any;
   private animationId: number | null = null;
   private resizeObserver?: ResizeObserver;
-  expanded: { metal: boolean; diamonds: boolean; head: boolean; band: boolean } = {
+  expanded: { metal: boolean; diamonds: boolean; head: boolean; band: boolean; gallery: boolean } = {
     metal: true,
     diamonds: true,
     head: true,
-    band: true
+    band: true,
+    gallery: true
   };
 
   state: any = {
@@ -103,8 +111,23 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     shape: 50
   };
 
-  toggle(key: 'metal' | 'diamonds' | 'head' | 'band') {
+  toggle(key: 'metal' | 'diamonds' | 'head' | 'band' | 'gallery') {
     this.expanded[key] = !this.expanded[key];
+  }
+
+  // Apply selected image as texture to the ring model
+  applyImageTexture(index: number) {
+    if (!this.ringModel) return;
+    const imgPath = this.galleryImages[index];
+    const textureLoader = new THREE.TextureLoader();
+  textureLoader.load(imgPath, (texture: any) => {
+      this.ringModel.traverse((obj: any) => {
+        if (obj.isMesh && obj.material && obj.material.map !== undefined) {
+          obj.material.map = texture;
+          obj.material.needsUpdate = true;
+        }
+      });
+    });
   }
 
   select(key: keyof HomeComponent['state'], value: any) {
