@@ -2,8 +2,39 @@
   <div class="home-layout">
     <!-- Main content (left) -->
     <div class="content">
+      <!-- Gallery Select Box -->
+      <div class="gallery-select">
+        <label for="galleryImageSelect">Resim/Model Seç:</label>
+        <select id="galleryImageSelect" [(ngModel)]="selectedGalleryImage" (change)="onGalleryImageChange()">
+          <option *ngFor="let img of galleryImages" [value]="img">{{ img.split('/').pop() }}</option>
+        </select>
+      </div>
       <div class="preview">
-        <div class="three-container" #threeContainer aria-label="3D Ring Viewer"></div>
+        <!-- If image, show image; if GLB, show 3D viewer -->
+        <div *ngIf="isImage(selectedGalleryImage)" 
+             class="image-container"
+             (mousedown)="onImageMouseDown($event)"
+             (mousemove)="onImageMouseMove($event)"
+             (mouseup)="onImageMouseUp($event)"
+             (mouseleave)="onImageMouseUp($event)">
+          <img [src]="selectedGalleryImage" 
+               alt="Seçili Resim"
+               draggable="false" />
+        </div>
+        <div *ngIf="isGlb(selectedGalleryImage)" 
+             class="three-container" 
+             #threeContainer 
+             aria-label="3D Ring Viewer"
+             title="Sol tık: Döndürme | Sağ tık: Taşıma | Mouse tekerlek: Zoom"
+             (mousedown)="onThreeMouseDown($event)"
+             (mouseleave)="onThreeMouseUp($event)"
+             (wheel)="onThreeWheel($event)">
+          <div class="three-controls-info">
+            <div>🖱️ Sol: Döndür</div>
+            <div>🖱️ Sağ: Taşı</div>
+            <div>🔄 Tekerlek: Zoom</div>
+          </div>
+        </div>
       </div>
     </div>
 

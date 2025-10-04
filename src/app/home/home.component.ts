@@ -11,6 +11,132 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
+  selectedGalleryImage: string;
+  
+  // Image dragging properties
+  private isDragging = false;
+  private startX = 0;
+  private startY = 0;
+  private imageX = 0;
+  private imageY = 0;
+
+  onGalleryImageChange() {
+    console.log('Selected item:', this.selectedGalleryImage);
+    if (this.isImage(this.selectedGalleryImage)) {
+      // Apply image as texture to Mesh10
+      if (this.ringModel) {
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load(this.selectedGalleryImage, (texture: any) => {
+          this.ringModel.traverse((obj: any) => {
+            if (obj.name === 'Mesh10' && obj.material) {
+              obj.material.map = texture;
+              obj.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    } else if (this.isGlb(this.selectedGalleryImage)) {
+      console.log('GLB selected, loading model...');
+      // Remove previous model from scene
+      if (this.ringModel && this.scene) {
+        this.scene.remove(this.ringModel);
+        this.ringModel = null;
+      }
+      // Scene hazır değilse bekle ve tekrar dene
+      if (this.scene && this.renderer && this.threeContainer) {
+        this.loadSelectedGlbModel();
+      } else {
+        console.log('Scene henüz hazır değil, 1 saniye sonra tekrar denenecek...');
+        setTimeout(() => {
+          if (this.scene && this.renderer && this.threeContainer) {
+            this.loadSelectedGlbModel();
+          }
+        }, 1000);
+      }
+    }
+  }
+
+  loadSelectedGlbModel() {
+    if (!this.isGlb(this.selectedGalleryImage)) return;
+    
+    // Scene ve renderer kontrol et
+    if (!this.scene || !this.renderer || !this.threeContainer) {
+      console.error('Three.js components henüz hazır değil');
+      return;
+    }
+    
+    console.log('Loading GLB model:', this.selectedGalleryImage);
+    const loader = new GLTFLoader();
+    
+    // Path'i düzelt - Angular assets klasörü için doğru path
+    let modelPath = this.selectedGalleryImage;
+    
+    console.log('Original path:', modelPath);
+    console.log('Final model path:', modelPath);
+    
+    loader.load(
+      modelPath,
+      (gltf: any) => {
+        console.log('GLB model loaded successfully');
+        
+        // Eski modeli temizle
+        if (this.ringModel) {
+          this.scene.remove(this.ringModel);
+          this.ringModel = null;
+        }
+        
+        this.ringModel = gltf.scene;
+        
+        // Mesh bilgilerini topla ve konsola yaz
+        const meshNames: string[] = [];
+        this.ringModel.traverse((obj: any) => {
+          if (obj.isMesh) {
+            meshNames.push(obj.name);
+            obj.castShadow = true;
+            obj.receiveShadow = true;
+            
+            // Material ayarları
+            if (obj.material) {
+              if ('metalness' in obj.material) {
+                obj.material.metalness = 0.95;
+                obj.material.roughness = 0.1;
+                obj.material.envMapIntensity = 1.2;
+              }
+              obj.material.needsUpdate = true;
+            }
+          }
+        });
+        
+        console.log('Yüklenen modeldeki meshler:', meshNames);
+        
+        // Model boyutunu otomatik ayarla
+        const box = new THREE.Box3().setFromObject(this.ringModel);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        
+        // Modeli merkeze al
+        this.ringModel.position.sub(center);
+        
+        // Boyutu normalize et
+        const maxSize = Math.max(size.x, size.y, size.z);
+        const scale = 1.5 / maxSize; // 1.5 birim hedef boyut
+        this.ringModel.scale.setScalar(scale);
+        
+        // Y ekseninde biraz aşağı kaydır
+        this.ringModel.position.y = -0.6;
+        
+        this.scene.add(this.ringModel);
+        console.log('Model sahneye eklendi');
+      },
+      (progress: any) => {
+        console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+      },
+      (err: any) => {
+        console.error('Failed to load GLB model:', err);
+        console.error('Model path:', modelPath);
+      }
+    );
+  }
   filterProngTips(tip: string) {
     this.state.prongTips = tip;
     if (!this.ringModel) return;
@@ -115,19 +241,122 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   isGlb(path: string): boolean {
     return /\.glb$/i.test(path);
   }
+
+  // Image dragging functions
+  onImageMouseDown(event: MouseEvent) {
+    this.isDragging = true;
+    this.startX = event.clientX - this.imageX;
+    this.startY = event.clientY - this.imageY;
+    
+    // Global mouse events for better dragging
+    document.addEventListener('mousemove', this.onDocumentMouseMove);
+    document.addEventListener('mouseup', this.onDocumentMouseUp);
+    
+    event.preventDefault();
+  }
+
+  onImageMouseMove(event: MouseEvent) {
+    if (!this.isDragging) return;
+    
+    this.imageX = event.clientX - this.startX;
+    this.imageY = event.clientY - this.startY;
+    
+    const imageElement = event.target as HTMLElement;
+    imageElement.style.transform = `translate(${this.imageX}px, ${this.imageY}px)`;
+    imageElement.style.transformOrigin = 'center center';
+    event.preventDefault();
+  }
+
+  onImageMouseUp(event: MouseEvent) {
+    this.isDragging = false;
+    event.preventDefault();
+  }
+
+  // Global mouse event handlers for better dragging
+  private onDocumentMouseMove = (event: MouseEvent) => {
+    if (!this.isDragging) return;
+    
+    // Serbest sürükleme - sınır yok
+    this.imageX = event.clientX - this.startX;
+    this.imageY = event.clientY - this.startY;
+    
+    const imageContainer = document.querySelector('.image-container img') as HTMLElement;
+    if (imageContainer) {
+      // Transform'u uygula - herhangi bir sınır olmadan
+      imageContainer.style.transform = `translate(${this.imageX}px, ${this.imageY}px)`;
+      imageContainer.style.transformOrigin = 'center center';
+      imageContainer.style.pointerEvents = 'auto';
+    }
+    event.preventDefault();
+  };
+
+  private onDocumentMouseUp = (event: MouseEvent) => {
+    this.isDragging = false;
+    document.removeEventListener('mousemove', this.onDocumentMouseMove);
+    document.removeEventListener('mouseup', this.onDocumentMouseUp);
+    event.preventDefault();
+  };
+
+  // 3D Canvas interaction functions
+  onThreeMouseDown(event: MouseEvent) {
+    // Change cursor to grabbing when dragging starts
+    const canvas = this.renderer?.domElement;
+    if (canvas) {
+      canvas.style.cursor = 'grabbing';
+    }
+    // OrbitControls'ın mouse event'lerini enable et
+    if (this.controls) {
+      this.controls.enabled = true;
+    }
+    event.preventDefault();
+  }
+
+  onThreeMouseUp(event: MouseEvent) {
+    // Reset cursor when dragging ends
+    const canvas = this.renderer?.domElement;
+    if (canvas) {
+      canvas.style.cursor = 'grab';
+    }
+    event.preventDefault();
+  }
+
+  onThreeWheel(event: WheelEvent) {
+    // Wheel event'lerinin OrbitControls tarafından işlenmesine izin ver
+    if (this.controls) {
+      this.controls.enabled = true;
+    }
+    // Event propagation'ı durdurma, OrbitControls kendi handle etsin
+    event.stopPropagation();
+  }
+
+  // Toggle auto rotation for better 3D demonstration
+  toggleAutoRotation() {
+    if (this.controls) {
+      this.controls.autoRotate = !this.controls.autoRotate;
+    }
+  }
+
+  // Reset camera position
+  resetCameraPosition() {
+    if (this.controls) {
+      this.controls.reset();
+    }
+  }
   // Asset images for model modification
   galleryImages: string[] = [
     // Images
-    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07323.JPG',
-    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07326.JPG',
-    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07332.JPG',
-    // 3D Models (GLB)
-    'assets/kendin-yap-fe/public/assets/models/source/Bilezik5.glb',
-    'assets/kendin-yap-fe/public/assets/models/source/ring14full.glb',
-    'assets/kendin-yap-fe/public/assets/models/source/ring20body.glb',
-    'assets/kendin-yap-fe/public/assets/models/source/the_ring_1_carat.glb',
-    'assets/kendin-yap-fe/public/assets/models/source/necklaces/necklace_8/n_8_full.glb'
+
+    // 3D Models (GLB) - Corrected paths
+    'assets/Bilezik5.glb',
+    'assets/ring14full.glb',
+    'assets/ring20body.glb',
+    'assets/the_ring_1_carat.glb',
+    'assets/n_5_full.glb',
+    'assets/n_8_full.glb'
   ];
+  constructor() {
+    this.selectedGalleryImage = this.galleryImages[0];
+  }
   private ringModel: any = null;
 
   // === Filter action functions for right panel ===
@@ -297,6 +526,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // Resize handling
     this.resizeObserver = new ResizeObserver(() => this.onResize());
     this.resizeObserver.observe(this.threeContainer.nativeElement);
+    
+    // Eğer seçili item GLB ise ve henüz yüklenmediyse, şimdi yükle
+    if (this.isGlb(this.selectedGalleryImage) && !this.ringModel) {
+      setTimeout(() => {
+        this.loadSelectedGlbModel();
+      }, 500);
+    }
   }
 
   ngOnDestroy(): void {
@@ -337,14 +573,56 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // Floor gradient look (fake with large plane + gradient fog)
     this.scene.fog = new THREE.Fog(0xf6f7fb, 6, 12);
 
-    // Controls
+    // Enhanced Controls for better 3D model dragging
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    
+    // Enable smooth damping for better interaction
     this.controls.enableDamping = true;
-    this.controls.enablePan = false;
-    this.controls.minDistance = 1.2;
-    this.controls.maxDistance = 3.0;
-    this.controls.minPolarAngle = Math.PI / 4;
-    this.controls.maxPolarAngle = Math.PI / 1.8;
+    this.controls.dampingFactor = 0.03;
+    
+    // Allow panning for better control - SERBEST TAŞIMA
+    this.controls.enablePan = true;
+    this.controls.panSpeed = 3.0;
+    
+    // Enable zooming - SERBEST ZOOM
+    this.controls.enableZoom = true;
+    this.controls.zoomSpeed = 1.5;
+    
+    // Set rotation limits - SERBEST DÖNME
+    this.controls.minDistance = 0.1;
+    this.controls.maxDistance = 50.0;
+    this.controls.minPolarAngle = 0; // Tam serbest
+    this.controls.maxPolarAngle = Math.PI; // Tam serbest
+    
+    // Enable rotation - SERBEST DÖNME
+    this.controls.enableRotate = true;
+    this.controls.rotateSpeed = 1.5;
+    
+    // Mouse button ayarları - TAŞIMA İÇİN
+    // Sol tık: döndürme, Sağ tık: taşıma, Orta tık: zoom
+    this.controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN
+    };
+    
+    // Touch ayarları - MOBİL İÇİN
+    this.controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN
+    };
+    
+    // Klavye desteği - SHIFT+SOL CLICK = TAŞIMA
+    this.controls.keys = {
+      LEFT: 'ArrowLeft',
+      UP: 'ArrowUp', 
+      RIGHT: 'ArrowRight',
+      BOTTOM: 'ArrowDown'
+    };
+    
+    // Auto rotate kapalı
+    this.controls.autoRotate = false;
+    this.controls.autoRotateSpeed = 0;
   }
 
   private loadModel() {
