@@ -41,16 +41,16 @@
         <div class="group">
           <div class="group-title">Carat Size</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('caratSize','One Stone')" (click)="select('caratSize','One Stone')">One Stone</button>
-            <button class="btn-option" [class.selected]="isSelected('caratSize','Two Stone')" (click)="select('caratSize','Two Stone')">Two Stone</button>
-            <button class="btn-option" [class.selected]="isSelected('caratSize','Three Stone')" (click)="select('caratSize','Three Stone')">Three Stone</button>
+            <button class="btn-option" [class.selected]="isSelected('caratSize','One Stone')" (click)="filterCaratSize('One Stone')">One Stone</button>
+            <button class="btn-option" [class.selected]="isSelected('caratSize','Two Stone')" (click)="filterCaratSize('Two Stone')">Two Stone</button>
+            <button class="btn-option" [class.selected]="isSelected('caratSize','Three Stone')" (click)="filterCaratSize('Three Stone')">Three Stone</button>
           </div>
         </div>
 
         <div class="group">
           <div class="group-title">Select/Resize Shape</div>
           <div class="range">
-            <input type="range" min="0" max="100" [value]="state.shape" (input)="state.shape = $any($event.target).value"/>
+            <input type="range" min="0" max="100" [value]="state.shape" (input)="filterShape($any($event.target).value)"/>
             <div class="range-values">{{ state.shape }}</div>
           </div>
         </div>
@@ -58,9 +58,9 @@
         <div class="group">
           <div class="group-title">Diamond Type</div>
           <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="changeDiamondType('Natural')">Natural</button>
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="changeDiamondType('Lab Grown')">Lab Grown</button>
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="changeDiamondType('Skip')">Skip</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="filterDiamondType('Natural')">Natural</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="filterDiamondType('Lab Grown')">Lab Grown</button>
+            <button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="filterDiamondType('Skip')">Skip</button>
           </div>
         </div>
       </div>

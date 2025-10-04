@@ -1,3 +1,4 @@
+// ...existing code...
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { Texture } from 'three';
@@ -10,6 +11,42 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
+  // Diamonds filter functions
+  filterCaratSize(size: string) {
+    this.state.caratSize = size;
+    if (!this.ringModel) return;
+    // Show/hide stones based on carat size
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.startsWith('Stone')) {
+        if (size === 'One Stone') obj.visible = obj.name === 'Stone1';
+        else if (size === 'Two Stone') obj.visible = obj.name === 'Stone1' || obj.name === 'Stone2';
+        else if (size === 'Three Stone') obj.visible = obj.name === 'Stone1' || obj.name === 'Stone2' || obj.name === 'Stone3';
+        else obj.visible = false;
+      }
+    });
+  }
+
+  filterShape(shape: number) {
+    this.state.shape = shape;
+    if (!this.ringModel) return;
+    // Example: update stone shape scale
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.startsWith('Stone')) {
+        obj.scale.set(1, 1, 1 + shape / 100); // Z ekseninde şekil değişimi
+      }
+    });
+  }
+
+  filterDiamondType(type: string) {
+    this.state.diamondType = type;
+    if (!this.ringModel) return;
+    // Example: change diamond color
+    this.ringModel.traverse((obj: any) => {
+      if (obj.name && obj.name.startsWith('Stone')) {
+        obj.material.color.set(type === 'Lab Grown' ? '#b9f2ff' : type === 'Natural' ? '#ffffff' : '#cccccc');
+      }
+    });
+  }
   isImage(path: string): boolean {
     return /\.(jpg|jpeg|png|gif)$/i.test(path);
   }
@@ -230,6 +267,23 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             }
           }
         });
+        // DEMO: Add 3 stones for filterCaratSize etc.
+  const stoneGeo = new THREE.SphereGeometry(0.13, 32, 32);
+  const stoneMat = new THREE.MeshStandardMaterial({ color: '#ffffff' });
+  // Place stones above the ring (Y axis)
+  const stoneY = 1.0; // much higher above the band
+  const stone1 = new THREE.Mesh(stoneGeo, stoneMat.clone());
+  stone1.name = 'Stone1';
+  stone1.position.set(0, stoneY, 0);
+  this.ringModel.add(stone1);
+  const stone2 = new THREE.Mesh(stoneGeo, stoneMat.clone());
+  stone2.name = 'Stone2';
+  stone2.position.set(0.18, stoneY, 0);
+  this.ringModel.add(stone2);
+  const stone3 = new THREE.Mesh(stoneGeo, stoneMat.clone());
+  stone3.name = 'Stone3';
+  stone3.position.set(-0.18, stoneY, 0);
+  this.ringModel.add(stone3);
         this.ringModel.scale.set(1, 1, 1);
         this.ringModel.position.set(0, -0.6, 0);
         this.scene.add(this.ringModel);
