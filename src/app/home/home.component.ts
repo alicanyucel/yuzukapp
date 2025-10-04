@@ -10,11 +10,24 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
+  isImage(path: string): boolean {
+    return /\.(jpg|jpeg|png|gif)$/i.test(path);
+  }
+  isGlb(path: string): boolean {
+    return /\.glb$/i.test(path);
+  }
   // Asset images for model modification
   galleryImages: string[] = [
+    // Images
     'assets/kendin-yap-fe/public/gallery/necklace4/DSC07323.JPG',
     'assets/kendin-yap-fe/public/gallery/necklace4/DSC07326.JPG',
-    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07332.JPG'
+    'assets/kendin-yap-fe/public/gallery/necklace4/DSC07332.JPG',
+    // 3D Models (GLB)
+    'assets/kendin-yap-fe/public/assets/models/source/Bilezik5.glb',
+    'assets/kendin-yap-fe/public/assets/models/source/ring14full.glb',
+    'assets/kendin-yap-fe/public/assets/models/source/ring20body.glb',
+    'assets/kendin-yap-fe/public/assets/models/source/the_ring_1_carat.glb',
+    'assets/kendin-yap-fe/public/assets/models/source/necklaces/necklace_8/n_8_full.glb'
   ];
   private ringModel: any = null;
 
