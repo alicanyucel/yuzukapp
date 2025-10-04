@@ -1,195 +1,160 @@
 <section class="home">
-  <div class="home-layout">
-    <!-- Main content (left) -->
-    <div class="content">
-      <!-- Gallery Select Box -->
-      <div class="gallery-select">
-        <label for="galleryImageSelect">Resim/Model Seç:</label>
-        <select id="galleryImageSelect" [(ngModel)]="selectedGalleryImage" (change)="onGalleryImageChange()">
-          <option *ngFor="let img of galleryImages" [value]="img">{{ img.split('/').pop() }}</option>
-        </select>
-      </div>
-      <div class="preview">
-        <!-- If image, show image; if GLB, show 3D viewer -->
-        <div *ngIf="isImage(selectedGalleryImage)" 
-             class="image-container"
-             (mousedown)="onImageMouseDown($event)"
-             (mousemove)="onImageMouseMove($event)"
-             (mouseup)="onImageMouseUp($event)"
-             (mouseleave)="onImageMouseUp($event)">
-          <img [src]="selectedGalleryImage" 
-               alt="Seçili Resim"
-               draggable="false" />
-        </div>
-        <div *ngIf="isGlb(selectedGalleryImage)" 
-             class="three-container" 
-             #threeContainer 
-             aria-label="3D Ring Viewer"
-             title="Sol tık: Döndürme | Sağ tık: Taşıma | Mouse tekerlek: Zoom"
-             (mousedown)="onThreeMouseDown($event)"
-             (mouseleave)="onThreeMouseUp($event)"
-             (wheel)="onThreeWheel($event)">
-          <div class="three-controls-info">
-            <div>🖱️ Sol: Döndür</div>
-            <div>🖱️ Sağ: Taşı</div>
-            <div>🔄 Tekerlek: Zoom</div>
-          </div>
-        </div>
-      </div>
-    </div>
+	<div class="home-layout">
+		<!-- Sol Önizleme Alanı -->
+		<div class="content" height-100vv>
+			<!-- Galeri Seçimi -->
+			<div class="gallery-select">
+				<label for="galleryImageSelect">Model / Görsel:</label>
+				<select id="galleryImageSelect" [(ngModel)]="selectedGalleryImage" (change)="onGalleryImageChange()">
+					<option *ngFor="let img of galleryImages" [value]="img">{{ img.split('/').pop() }}</option>
+				</select>
+			</div>
 
+			<div class="preview">
+				<!-- Seçim türüne göre göster -->
+				<div *ngIf="isImage(selectedGalleryImage)"
+						 class="image-container"
+						 (mousedown)="onImageMouseDown($event)"
+						 (mousemove)="onImageMouseMove($event)"
+						 (mouseup)="onImageMouseUp($event)"
+						 (mouseleave)="onImageMouseUp($event)">
+					<img [src]="selectedGalleryImage" alt="Seçili Görsel" draggable="false" />
+				</div>
 
-  <!-- Filters (right) -->
-  <aside class="filters">
-    <!-- Metal -->
-    <div class="filter-card">
-      <button class="card-header" (click)="toggle('metal')">
-        <span>Metal</span>
-        <span class="chev" [class.open]="expanded['metal']">▾</span>
-      </button>
-      <div class="card-body" *ngIf="expanded['metal']">
-        <div class="group">
-          <div class="group-title">Head & Band Color</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('metalColor','14k White')" (click)="changeMetalColor('14k White')">14k White</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','18k White')" (click)="changeMetalColor('18k White')">18k White</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','14k Rose')" (click)="changeMetalColor('14k Rose')">14k Rose</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','18k Rose')" (click)="changeMetalColor('18k Rose')">18k Rose</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','Platinum')" (click)="changeMetalColor('Platinum')">Platinum</button>
-            <button class="btn-option" [class.selected]="isSelected('metalColor','Mixed')" (click)="changeMetalColor('Mixed')">Mixed</button>
-          </div>
-        </div>
-      </div>
-    </div>
+				<div *ngIf="isGlb(selectedGalleryImage)"
+						 class="three-container"
+						 #threeContainer
+						 (mousedown)="onThreeMouseDown($event)"
+						 (mouseup)="onThreeMouseUp($event)"
+						 (mouseleave)="onThreeMouseUp($event)"
+						 (wheel)="onThreeWheel($event)"
+						 aria-label="3D Ring Viewer">
+					<!-- İpucu Alanı -->
+					<div class="three-controls-info">
+						<div>🖱️ Sol: Döndür</div>
+						<div>🖱️ Sağ: Taşı</div>
+						<div>🔄 Tekerlek: Zoom</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    <!-- Diamonds -->
-    <div class="filter-card">
-      <button class="card-header" (click)="toggle('diamonds')">
-        <span>Diamonds</span>
-        <span class="chev" [class.open]="expanded['diamonds']">▾</span>
-      </button>
-      <div class="card-body" *ngIf="expanded['diamonds']">
-        <div class="group">
-          <div class="group-title">Carat Size</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('caratSize','One Stone')" (click)="filterCaratSize('One Stone')">One Stone</button>
-            <button class="btn-option" [class.selected]="isSelected('caratSize','Two Stone')" (click)="filterCaratSize('Two Stone')">Two Stone</button>
-            <button class="btn-option" [class.selected]="isSelected('caratSize','Three Stone')" (click)="filterCaratSize('Three Stone')">Three Stone</button>
-          </div>
-        </div>
+		<!-- Sağ Filtreler -->
+		<aside class="filters">
+			<!-- Metal -->
+			<div class="filter-card">
+				<button class="card-header" (click)="toggle('metal')">
+					<span>Metal</span>
+					<span>{{ expanded.metal ? '▾' : '▸' }}</span>
+				</button>
+				<div class="card-body" *ngIf="expanded.metal">
+					<div class="group-title">Head & Band Color</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('metalColor','14k White')" (click)="changeMetalColor('14k White')">14k White</button>
+						<button class="btn-option" [class.selected]="isSelected('metalColor','18k White')" (click)="changeMetalColor('18k White')">18k White</button>
+						<button class="btn-option" [class.selected]="isSelected('metalColor','14k Rose')" (click)="changeMetalColor('14k Rose')">14k Rose</button>
+						<button class="btn-option" [class.selected]="isSelected('metalColor','18k Rose')" (click)="changeMetalColor('18k Rose')">18k Rose</button>
+						<button class="btn-option" [class.selected]="isSelected('metalColor','Platinum')" (click)="changeMetalColor('Platinum')">Platinum</button>
+						<button class="btn-option" [class.selected]="isSelected('metalColor','Mixed')" (click)="changeMetalColor('Mixed')">Mixed</button>
+					</div>
+				</div>
+			</div>
 
-        <div class="group">
-          <div class="group-title">Select/Resize Shape</div>
-          <div class="range">
-            <input type="range" min="0" max="100" [value]="state.shape" (input)="filterShape($any($event.target).value)"/>
-            <div class="range-values">{{ state.shape }}</div>
-          </div>
-        </div>
+			<!-- Diamonds -->
+			<div class="filter-card">
+				<button class="card-header" (click)="toggle('diamonds')">
+					<span>Diamonds</span>
+					<span>{{ expanded.diamonds ? '▾' : '▸' }}</span>
+				</button>
+				<div class="card-body" *ngIf="expanded.diamonds">
+					<div class="group-title">Carat Size</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('caratSize','One Stone')" (click)="filterCaratSize('One Stone')">One Stone</button>
+						<button class="btn-option" [class.selected]="isSelected('caratSize','Two Stone')" (click)="filterCaratSize('Two Stone')">Two Stone</button>
+						<button class="btn-option" [class.selected]="isSelected('caratSize','Three Stone')" (click)="filterCaratSize('Three Stone')">Three Stone</button>
+					</div>
+					<div class="group-title">Shape Resize</div>
+					<div class="range">
+						<input type="range" min="0" max="100" [value]="state.shape" (input)="filterShape($any($event.target).value)">
+						<div class="range-values">{{ state.shape }}</div>
+					</div>
+					<div class="group-title">Diamond Type</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="filterDiamondType('Natural')">Natural</button>
+						<button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="filterDiamondType('Lab Grown')">Lab Grown</button>
+						<button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="filterDiamondType('Skip')">Skip</button>
+					</div>
+				</div>
+			</div>
 
-        <div class="group">
-          <div class="group-title">Diamond Type</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Natural')" (click)="filterDiamondType('Natural')">Natural</button>
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Lab Grown')" (click)="filterDiamondType('Lab Grown')">Lab Grown</button>
-            <button class="btn-option" [class.selected]="isSelected('diamondType','Skip')" (click)="filterDiamondType('Skip')">Skip</button>
-          </div>
-        </div>
-      </div>
-    </div>
+			<!-- Head -->
+			<div class="filter-card">
+				<button class="card-header" (click)="toggle('head')">
+					<span>Head</span>
+					<span>{{ expanded.head ? '▾' : '▸' }}</span>
+				</button>
+				<div class="card-body" *ngIf="expanded.head">
+					<div class="group-title">Basket & Halo</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('basket','None')" (click)="changeBasket('None')">None</button>
+						<button class="btn-option" [class.selected]="isSelected('basket','Basket')" (click)="changeBasket('Basket')">Basket</button>
+						<button class="btn-option" [class.selected]="isSelected('basket','Halo')" (click)="changeBasket('Halo')">Halo</button>
+						<button class="btn-option" [class.selected]="isSelected('basket','Hidden Halo')" (click)="changeBasket('Hidden Halo')">Hidden Halo</button>
+					</div>
+					<div class="group-title">Prong Count</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('prongs','4 Prong')" (click)="changeProngs('4 Prong')">4 Prong</button>
+						<button class="btn-option" [class.selected]="isSelected('prongs','6 Prong')" (click)="changeProngs('6 Prong')">6 Prong</button>
+						<button class="btn-option" [class.selected]="isSelected('prongs','4 Compass')" (click)="changeProngs('4 Compass')">4 Compass</button>
+					</div>
+					<div class="group-title">Prong Tips</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('prongTips','Rounded')" (click)="filterProngTips('Rounded')">Rounded</button>
+						<button class="btn-option" [class.selected]="isSelected('prongTips','Claw')" (click)="filterProngTips('Claw')">Claw</button>
+						<button class="btn-option" [class.selected]="isSelected('prongTips','Knife')" (click)="filterProngTips('Knife')">Knife</button>
+					</div>
+					<div class="group-title">Prong Pave</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('prongPave','None')" (click)="filterProngPave('None')">None</button>
+						<button class="btn-option" [class.selected]="isSelected('prongPave','Pave')" (click)="filterProngPave('Pave')">Pave</button>
+					</div>
+				</div>
+			</div>
 
-    <!-- Head -->
-    <div class="filter-card">
-      <button class="card-header" (click)="toggle('head')">
-        <span>Head</span>
-        <span class="chev" [class.open]="expanded['head']">▾</span>
-      </button>
-      <div class="card-body" *ngIf="expanded['head']">
-        <div class="group">
-          <div class="group-title">Basket & Halo</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('basket','None')" (click)="changeBasket('None')">None</button>
-            <button class="btn-option" [class.selected]="isSelected('basket','Basket')" (click)="changeBasket('Basket')">Basket</button>
-            <button class="btn-option" [class.selected]="isSelected('basket','Halo')" (click)="changeBasket('Halo')">Halo</button>
-            <button class="btn-option" [class.selected]="isSelected('basket','Hidden Halo')" (click)="changeBasket('Hidden Halo')">Hidden Halo</button>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Prong Count</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('prongs','4 Prong')" (click)="changeProngs('4 Prong')">4 Prong</button>
-            <button class="btn-option" [class.selected]="isSelected('prongs','6 Prong')" (click)="changeProngs('6 Prong')">6 Prong</button>
-            <button class="btn-option" [class.selected]="isSelected('prongs','4 Compass')" (click)="changeProngs('4 Compass')">4 Compass</button>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Prong Tips</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('prongTips','Rounded')" (click)="filterProngTips('Rounded')">Rounded</button>
-            <button class="btn-option" [class.selected]="isSelected('prongTips','Claw')" (click)="filterProngTips('Claw')">Claw</button>
-            <button class="btn-option" [class.selected]="isSelected('prongTips','Knife')" (click)="filterProngTips('Knife')">Knife</button>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Prong Pave</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('prongPave','None')" (click)="filterProngPave('None')">None</button>
-            <button class="btn-option" [class.selected]="isSelected('prongPave','Pave')" (click)="filterProngPave('Pave')">Pave</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Band -->
-    <div class="filter-card">
-      <button class="card-header" (click)="toggle('band')">
-        <span>Band</span>
-        <span class="chev" [class.open]="expanded['band']">▾</span>
-      </button>
-      <div class="card-body" *ngIf="expanded['band']">
-        <div class="group">
-          <div class="group-title">Style</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('bandStyle','Round')" (click)="filterBandStyle('Round')">Round</button>
-            <button class="btn-option" [class.selected]="isSelected('bandStyle','Square')" (click)="filterBandStyle('Square')">Square</button>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Cathedral</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('cathedral','None')" (click)="filterCathedral('None')">None</button>
-            <button class="btn-option" [class.selected]="isSelected('cathedral','Cathedral')" (click)="filterCathedral('Cathedral')">Cathedral</button>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Band Width</div>
-          <div class="range">
-            <input type="range" min="1" max="7" step="0.1" [value]="state.bandWidth" (input)="filterBandWidth($any($event.target).value)"/>
-            <div class="range-values">{{ state.bandWidth }} mm</div>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Ring Size (US)</div>
-          <div class="range">
-            <input type="range" min="3" max="13" step="0.5" [value]="state.ringSize" (input)="filterRingSize($any($event.target).value)"/>
-            <div class="range-values">{{ state.ringSize }}</div>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-title">Fit</div>
-          <div class="options">
-            <button class="btn-option" [class.selected]="isSelected('fit','ComfortFit')" (click)="filterFit('ComfortFit')">ComfortFit</button>
-            <button class="btn-option" [class.selected]="isSelected('fit','StandardFit')" (click)="filterFit('StandardFit')">StandardFit</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </aside>
-</div>
+			<!-- Band -->
+			<div class="filter-card">
+				<button class="card-header" (click)="toggle('band')">
+					<span>Band</span>
+					<span>{{ expanded.band ? '▾' : '▸' }}</span>
+				</button>
+				<div class="card-body" *ngIf="expanded.band">
+					<div class="group-title">Style</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('bandStyle','Round')" (click)="filterBandStyle('Round')">Round</button>
+						<button class="btn-option" [class.selected]="isSelected('bandStyle','Square')" (click)="filterBandStyle('Square')">Square</button>
+					</div>
+					<div class="group-title">Cathedral</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('cathedral','None')" (click)="filterCathedral('None')">None</button>
+						<button class="btn-option" [class.selected]="isSelected('cathedral','Cathedral')" (click)="filterCathedral('Cathedral')">Cathedral</button>
+					</div>
+					<div class="group-title">Band Width</div>
+					<div class="range">
+						<input type="range" min="1" max="7" step="0.1" [value]="state.bandWidth" (input)="filterBandWidth($any($event.target).value)">
+						<div class="range-values">{{ state.bandWidth }} mm</div>
+					</div>
+					<div class="group-title">Ring Size (US)</div>
+						<div class="range">
+							<input type="range" min="3" max="13" step="0.5" [value]="state.ringSize" (input)="filterRingSize($any($event.target).value)">
+							<div class="range-values">{{ state.ringSize }}</div>
+						</div>
+					<div class="group-title">Fit</div>
+					<div class="options">
+						<button class="btn-option" [class.selected]="isSelected('fit','ComfortFit')" (click)="filterFit('ComfortFit')">ComfortFit</button>
+						<button class="btn-option" [class.selected]="isSelected('fit','StandardFit')" (click)="filterFit('StandardFit')">StandardFit</button>
+					</div>
+				</div>
+			</div>
+		</aside>
+	</div>
 </section>

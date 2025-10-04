@@ -119,11 +119,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         
         // Boyutu normalize et
         const maxSize = Math.max(size.x, size.y, size.z);
-        const scale = 1.5 / maxSize; // 1.5 birim hedef boyut
+        const scale = 2.0 / maxSize; // 1.5 birim hedef boyut
         this.ringModel.scale.setScalar(scale);
         
         // Y ekseninde biraz aşağı kaydır
-        this.ringModel.position.y = -0.6;
+        this.ringModel.position.y = 0.0;
         
         this.scene.add(this.ringModel);
         console.log('Model sahneye eklendi');
@@ -261,9 +261,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.imageX = event.clientX - this.startX;
     this.imageY = event.clientY - this.startY;
     
-    const imageElement = event.target as HTMLElement;
-    imageElement.style.transform = `translate(${this.imageX}px, ${this.imageY}px)`;
-    imageElement.style.transformOrigin = 'center center';
+  const imageElement = event.target as HTMLElement;
+  imageElement.style.setProperty('--tx', this.imageX + 'px');
+  imageElement.style.setProperty('--ty', this.imageY + 'px');
+  imageElement.style.transformOrigin = 'center center';
     event.preventDefault();
   }
 
@@ -282,8 +283,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     
     const imageContainer = document.querySelector('.image-container img') as HTMLElement;
     if (imageContainer) {
-      // Transform'u uygula - herhangi bir sınır olmadan
-      imageContainer.style.transform = `translate(${this.imageX}px, ${this.imageY}px)`;
+      imageContainer.style.setProperty('--tx', this.imageX + 'px');
+      imageContainer.style.setProperty('--ty', this.imageY + 'px');
       imageContainer.style.transformOrigin = 'center center';
       imageContainer.style.pointerEvents = 'auto';
     }
