@@ -80,13 +80,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   filterCaratSize(size: string) {
     this.state.caratSize = size;
     if (!this.ringModel) return;
-    // Show/hide stones based on carat size
+    // Sadece 'Mesh10' mesh için göster/gizle
     this.ringModel.traverse((obj: any) => {
-      if (obj.name && obj.name.startsWith('Stone')) {
-        if (size === 'One Stone') obj.visible = obj.name === 'Stone1';
-        else if (size === 'Two Stone') obj.visible = obj.name === 'Stone1' || obj.name === 'Stone2';
-        else if (size === 'Three Stone') obj.visible = obj.name === 'Stone1' || obj.name === 'Stone2' || obj.name === 'Stone3';
-        else obj.visible = false;
+      if (obj.name === 'Mesh10') {
+        obj.visible = true; // Her zaman görünür, isterseniz burayı özelleştirin
       }
     });
   }
@@ -94,10 +91,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   filterShape(shape: number) {
     this.state.shape = shape;
     if (!this.ringModel) return;
-    // Example: update stone shape scale
+    // Sadece 'Mesh10' mesh için şekil değişimi
     this.ringModel.traverse((obj: any) => {
-      if (obj.name && obj.name.startsWith('Stone')) {
-        obj.scale.set(1, 1, 1 + shape / 100); // Z ekseninde şekil değişimi
+      if (obj.name === 'Mesh10') {
+        obj.scale.set(1, 1, 1 + shape / 100);
       }
     });
   }
@@ -105,9 +102,9 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   filterDiamondType(type: string) {
     this.state.diamondType = type;
     if (!this.ringModel) return;
-    // Example: change diamond color
+    // Sadece 'Mesh10' mesh için renk değişimi
     this.ringModel.traverse((obj: any) => {
-      if (obj.name && obj.name.startsWith('Stone')) {
+      if (obj.name === 'Mesh10') {
         obj.material.color.set(type === 'Lab Grown' ? '#b9f2ff' : type === 'Natural' ? '#ffffff' : '#cccccc');
       }
     });
@@ -170,6 +167,18 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         obj.visible = (type === 'Hidden Halo');
         obj.material.color.set('#c08081');
       }
+      // Mesh10 için Head filtre etkisi
+      if (obj.name === 'Mesh10') {
+        if (type === 'Basket') {
+          obj.material.color.set('#b76e79');
+        } else if (type === 'Halo') {
+          obj.material.color.set('#eaeaea');
+        } else if (type === 'Hidden Halo') {
+          obj.material.color.set('#c08081');
+        } else {
+          obj.material.color.set('#ffffff');
+        }
+      }
     });
   }
 
@@ -198,6 +207,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       if (obj.name && obj.name.includes('Band')) {
         obj.scale.x = style === 'Square' ? 1.2 : 1.0;
       }
+      // Mesh10 için Band filtre etkisi
+      if (obj.name === 'Mesh10') {
+        obj.scale.x = style === 'Square' ? 1.2 : 1.0;
+      }
     });
   }
 
@@ -206,6 +219,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (!this.ringModel) return;
     this.ringModel.traverse((obj: any) => {
       if (obj.name && obj.name.includes('Ring')) {
+        obj.scale.set(size / 6, size / 6, size / 6);
+      }
+      // Mesh10 için Ring Size etkisi
+      if (obj.name === 'Mesh10') {
         obj.scale.set(size / 6, size / 6, size / 6);
       }
     });
@@ -331,119 +348,49 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   private loadModel() {
-    const loader = new GLTFLoader();
-    // Pick a ring model from assets
-    const url = 'assets/kendin-yap-fe/public/assets/models/source/the_ring_1_carat.glb';
-    loader.load(
-      url,
-      (gltf: any) => {
-        this.ringModel = gltf.scene;
-        this.ringModel.traverse((obj: any) => {
-          if (obj.isMesh) {
-            obj.castShadow = true;
-            obj.receiveShadow = true;
-            if (obj.material && 'metalness' in obj.material) {
-              obj.material.metalness = 0.95;
-              obj.material.roughness = 0.1;
-              obj.material.envMapIntensity = 1.2;
+        // Modeldeki tüm meshlerin detaylarını konsola yazdır
+        if (this.ringModel) {
+          this.ringModel.traverse((obj: any) => {
+            if (obj.isMesh) {
+              console.log('Mesh:', {
+                name: obj.name,
+                type: obj.type,
+                material: obj.material?.name || obj.material?.type,
+                geometry: obj.geometry?.type
+              });
             }
-          }
-        });
-        // DEMO: Add 3 stones for filterCaratSize etc.
-        const stoneGeo = new THREE.SphereGeometry(0.13, 32, 32);
-        const stoneMat = new THREE.MeshStandardMaterial({ color: '#ffffff' });
-        const stoneY = 1.0;
-        const stone1 = new THREE.Mesh(stoneGeo, stoneMat.clone());
-        stone1.name = 'Stone1';
-        stone1.position.set(0, stoneY, 0);
-        this.ringModel.add(stone1);
-        const stone2 = new THREE.Mesh(stoneGeo, stoneMat.clone());
-        stone2.name = 'Stone2';
-        stone2.position.set(0.18, stoneY, 0);
-        this.ringModel.add(stone2);
-        const stone3 = new THREE.Mesh(stoneGeo, stoneMat.clone());
-        stone3.name = 'Stone3';
-        stone3.position.set(-0.18, stoneY, 0);
-        this.ringModel.add(stone3);
-
-        // DEMO: Add 6 prongs around the stones
-        for (let i = 0; i < 6; i++) {
-          const prongGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.25, 12);
-          const prongMat = new THREE.MeshStandardMaterial({ color: '#eaeaea' });
-          const prong = new THREE.Mesh(prongGeo, prongMat);
-          prong.name = 'Prong' + (i + 1);
-          const angle = (i / 6) * Math.PI * 2;
-          prong.position.set(Math.cos(angle) * 0.18, stoneY + 0.13, Math.sin(angle) * 0.18);
-          prong.rotation.x = Math.PI / 2;
-          this.ringModel.add(prong);
+          });
         }
+    const loader = new GLTFLoader();
+  // Pick a ring model from assets
+  const url = 'assets/kendin-yap-fe/public/assets/models/source/Bilezik5.glb';
+  loader.load(
+    url,
+    (gltf: any) => {
+      this.ringModel = gltf.scene;
+      this.ringModel.traverse((obj: any) => {
+        if (obj.isMesh) {
+          obj.castShadow = true;
+          obj.receiveShadow = true;
+          if (obj.material && 'metalness' in obj.material) {
+            obj.material.metalness = 0.95;
+            obj.material.roughness = 0.1;
+            obj.material.envMapIntensity = 1.2;
+          }
+          // Mesh isimlerini konsola yazdır
+          console.log('Mesh name:', obj.name);
+        }
+      });
 
-
-  // DEMO: Add Basket mesh
-  const basketGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.08, 32);
-  const basketMat = new THREE.MeshStandardMaterial({ color: '#b76e79' });
-  const basket = new THREE.Mesh(basketGeo, basketMat);
-  basket.name = 'Basket';
-  basket.position.set(0, stoneY + 0.05, 0);
-  this.ringModel.add(basket);
-
-  // DEMO: Add Halo mesh
-  const haloGeo = new THREE.TorusGeometry(0.16, 0.015, 16, 100);
-  const haloMat = new THREE.MeshStandardMaterial({ color: '#eaeaea' });
-  const halo = new THREE.Mesh(haloGeo, haloMat);
-  halo.name = 'Halo';
-  halo.position.set(0, stoneY + 0.09, 0);
-  this.ringModel.add(halo);
-
-  // DEMO: Add Hidden Halo mesh
-  const hiddenHaloGeo = new THREE.TorusGeometry(0.13, 0.01, 16, 100);
-  const hiddenHaloMat = new THREE.MeshStandardMaterial({ color: '#c08081' });
-  const hiddenHalo = new THREE.Mesh(hiddenHaloGeo, hiddenHaloMat);
-  hiddenHalo.name = 'Hidden Halo';
-  hiddenHalo.position.set(0, stoneY + 0.03, 0);
-  this.ringModel.add(hiddenHalo);
-
-  // DEMO: Add ProngTip mesh
-  const tipGeo = new THREE.SphereGeometry(0.03, 16, 16);
-  const tipMat = new THREE.MeshStandardMaterial({ color: '#5a5abc' });
-  const prongTip = new THREE.Mesh(tipGeo, tipMat);
-  prongTip.name = 'ProngTip';
-  prongTip.position.set(0, stoneY + 0.28, 0);
-  this.ringModel.add(prongTip);
-
-  // DEMO: Add ProngPave mesh
-  const paveGeo = new THREE.TorusGeometry(0.18, 0.01, 16, 100);
-  const paveMat = new THREE.MeshStandardMaterial({ color: '#b9f2ff' });
-  const prongPave = new THREE.Mesh(paveGeo, paveMat);
-  prongPave.name = 'ProngPave';
-  prongPave.position.set(0, stoneY + 0.18, 0);
-  this.ringModel.add(prongPave);
-
-  // DEMO: Add Band mesh
-  const bandGeo = new THREE.TorusGeometry(0.22, 0.04, 32, 100);
-  const bandMat = new THREE.MeshStandardMaterial({ color: '#eaeaea' });
-  const band = new THREE.Mesh(bandGeo, bandMat);
-  band.name = 'Band';
-  band.position.set(0, stoneY - 0.18, 0);
-  this.ringModel.add(band);
-
-  // DEMO: Add Ring mesh
-  const ringGeo = new THREE.TorusGeometry(0.22, 0.03, 32, 100);
-  const ringMat = new THREE.MeshStandardMaterial({ color: '#eaeaea' });
-  const ring = new THREE.Mesh(ringGeo, ringMat);
-  ring.name = 'Ring';
-  ring.position.set(0, stoneY - 0.18, 0);
-  this.ringModel.add(ring);
-
-  this.ringModel.scale.set(1, 1, 1);
-  this.ringModel.position.set(0, -0.6, 0);
-  this.scene.add(this.ringModel);
-      },
-      undefined,
-      (err: any) => {
-        console.error('Failed to load model', err);
-      }
-    );
+      this.ringModel.scale.set(1, 1, 1);
+      this.ringModel.position.set(0, -0.6, 0);
+      this.scene.add(this.ringModel);
+    },
+    undefined,
+    (err: any) => {
+      console.error('Failed to load model', err);
+    }
+  );
   }
 
   private onResize() {
