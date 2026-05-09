@@ -8,11 +8,67 @@
 				<select id="galleryImageSelect" [(ngModel)]="selectedGalleryImage" (change)="onGalleryImageChange()">
 					<option *ngFor="let img of galleryImages" [value]="img">{{ img.split('/').pop() }}</option>
 				</select>
+				<button class="try-on-toggle" type="button" (click)="toggleTryOnMode()">
+					{{ tryOnMode ? '3D Gorunume Don' : 'Sanal Dene' }}
+				</button>
+			</div>
+
+			<div class="try-on-controls" *ngIf="tryOnMode">
+				<label class="upload-card" for="handImageUpload">
+					<input id="handImageUpload" type="file" accept="image/*" (change)="onHandImageSelected($event)" hidden>
+					<span>El fotografi yukle</span>
+					<small>Yuzugu foto ustunde surukleyip boyutlandir.</small>
+				</label>
+				<button class="ghost-action" type="button" (click)="captureRingForTryOn()">Yuzugu guncelle</button>
+				<button class="ghost-action" type="button" (click)="resetTryOnPlacement()">Konumu sifirla</button>
 			</div>
 
 			<div class="preview">
+				<div *ngIf="tryOnMode" class="try-on-stage-wrapper">
+					<div class="try-on-hero">
+						<div>
+							<p class="eyebrow">Virtual Try-On Studio</p>
+							<h2>Yuzugu parmagin ustune canli yerlestir</h2>
+							<p class="try-on-copy">Fotografi yukle, yuzugu buyut, cevir ve istedigin noktaya birak. Bu ekran artik daha buyuk ve daha belirgin calisiyor.</p>
+						</div>
+						<div class="try-on-badges">
+							<span>{{ handImageUrl ? 'El fotografisi hazir' : 'Fotograf bekleniyor' }}</span>
+							<span>{{ tryOnRingImageUrl ? 'Yuzuk overlay hazir' : 'Yuzuk render bekleniyor' }}</span>
+						</div>
+					</div>
+					<div class="try-on-stage" [class.empty]="!handImageUrl">
+						<img *ngIf="handImageUrl" class="hand-image" [src]="handImageUrl" alt="El fotografi">
+						<div *ngIf="!handImageUrl" class="try-on-empty-state">
+							<p>Bir el fotografisi yukleyin, sonra yuzugu parmagin ustune yerlestirin.</p>
+							<strong>Bu alan artik buyuk onizleme cercevesi olarak calisiyor.</strong>
+						</div>
+						<img
+							*ngIf="handImageUrl && tryOnRingImageUrl"
+							class="ring-overlay"
+							[src]="tryOnRingImageUrl"
+							alt="Yuzuk overlay"
+							[style.transform]="'translate(' + ringPosition.x + 'px, ' + ringPosition.y + 'px) rotate(' + ringRotation + 'deg) scale(' + ringScale + ')'"
+							(mousedown)="startRingDrag($event)"
+						>
+					</div>
+					<div class="try-on-adjustments" *ngIf="handImageUrl">
+						<label>
+							<span>Boyut</span>
+							<input type="range" min="0.4" max="2.4" step="0.05" [value]="ringScale" (input)="updateRingScale($any($event.target).value)">
+						</label>
+						<label>
+							<span>Aci</span>
+							<input type="range" min="-180" max="180" step="1" [value]="ringRotation" (input)="updateRingRotation($any($event.target).value)">
+						</label>
+						<div class="adjustment-values">
+							<span>Boyut: {{ ringScale | number:'1.1-2' }}x</span>
+							<span>Aci: {{ ringRotation }} deg</span>
+						</div>
+					</div>
+				</div>
+
 				<!-- Seçim türüne göre göster -->
-				<div *ngIf="isImage(selectedGalleryImage)"
+				<div *ngIf="!tryOnMode && isImage(selectedGalleryImage)"
 						 class="image-container"
 						 (mousedown)="onImageMouseDown($event)"
 						 (mousemove)="onImageMouseMove($event)"
@@ -21,7 +77,7 @@
 					<img [src]="selectedGalleryImage" alt="Seçili Görsel" draggable="false" />
 				</div>
 
-				<div *ngIf="isGlb(selectedGalleryImage)"
+				<div *ngIf="!tryOnMode && isGlb(selectedGalleryImage)"
 						 class="three-container"
 						 #threeContainer
 						 (mousedown)="onThreeMouseDown($event)"

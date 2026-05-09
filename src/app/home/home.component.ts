@@ -12,13 +12,21 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
   selectedGalleryImage: string;
-  
+  handImageUrl: string | null = null;
+  tryOnRingImageUrl: string | null = null;
+  tryOnMode = false;
+  ringScale = 1;
+  ringRotation = -18;
+  ringPosition = { x: 0, y: 0 };
+
   // Image dragging properties
   private isDragging = false;
   private startX = 0;
   private startY = 0;
   private imageX = 0;
   private imageY = 0;
+  private isRingDragging = false;
+  private ringDragOffset = { x: 0, y: 0 };
 
   onGalleryImageChange() {
     console.log('Selected item:', this.selectedGalleryImage);
@@ -54,39 +62,126 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         }, 1000);
       }
     }
+
+    if (this.tryOnMode) {
+      this.captureRingForTryOn();
+    }
+  }
+
+  toggleTryOnMode() {
+    this.tryOnMode = !this.tryOnMode;
+    if (this.tryOnMode) {
+      this.captureRingForTryOn();
+    }
+  }
+
+  onHandImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.handImageUrl = typeof reader.result === 'string' ? reader.result : null;
+      this.tryOnMode = true;
+      this.resetTryOnPlacement();
+      this.captureRingForTryOn();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  resetTryOnPlacement() {
+    this.ringScale = 1;
+    this.ringRotation = -18;
+    this.ringPosition = { x: 0, y: 0 };
+  }
+
+  updateRingScale(value: string | number) {
+    this.ringScale = Number(value);
+  }
+
+  updateRingRotation(value: string | number) {
+    this.ringRotation = Number(value);
+  }
+
+  startRingDrag(event: MouseEvent) {
+    this.isRingDragging = true;
+    this.ringDragOffset = {
+      x: event.clientX - this.ringPosition.x,
+      y: event.clientY - this.ringPosition.y
+    };
+
+    document.addEventListener('mousemove', this.onTryOnMouseMove);
+    document.addEventListener('mouseup', this.onTryOnMouseUp);
+    event.preventDefault();
+  }
+
+  private onTryOnMouseMove = (event: MouseEvent) => {
+    if (!this.isRingDragging) {
+      return;
+    }
+
+    this.ringPosition = {
+      x: event.clientX - this.ringDragOffset.x,
+      y: event.clientY - this.ringDragOffset.y
+    };
+    event.preventDefault();
+  };
+
+  private onTryOnMouseUp = (event: MouseEvent) => {
+    this.isRingDragging = false;
+    document.removeEventListener('mousemove', this.onTryOnMouseMove);
+    document.removeEventListener('mouseup', this.onTryOnMouseUp);
+    event.preventDefault();
+  };
+
+  captureRingForTryOn() {
+    if (this.isImage(this.selectedGalleryImage)) {
+      this.tryOnRingImageUrl = this.selectedGalleryImage;
+      return;
+    }
+
+    if (this.isGlb(this.selectedGalleryImage) && this.renderer?.domElement) {
+      requestAnimationFrame(() => {
+        this.tryOnRingImageUrl = this.renderer.domElement.toDataURL('image/png');
+      });
+    }
   }
 
   loadSelectedGlbModel() {
     if (!this.isGlb(this.selectedGalleryImage)) return;
-    
+
     // Scene ve renderer kontrol et
     if (!this.scene || !this.renderer || !this.threeContainer) {
       console.error('Three.js components henüz hazır değil');
       return;
     }
-    
+
     console.log('Loading GLB model:', this.selectedGalleryImage);
     const loader = new GLTFLoader();
-    
+
     // Path'i düzelt - Angular assets klasörü için doğru path
     let modelPath = this.selectedGalleryImage;
-    
+
     console.log('Original path:', modelPath);
     console.log('Final model path:', modelPath);
-    
+
     loader.load(
       modelPath,
       (gltf: any) => {
         console.log('GLB model loaded successfully');
-        
+
         // Eski modeli temizle
         if (this.ringModel) {
           this.scene.remove(this.ringModel);
           this.ringModel = null;
         }
-        
+
         this.ringModel = gltf.scene;
-        
+
         // Mesh bilgilerini topla ve konsola yaz
         const meshNames: string[] = [];
         this.ringModel.traverse((obj: any) => {
@@ -94,7 +189,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             meshNames.push(obj.name);
             obj.castShadow = true;
             obj.receiveShadow = true;
-            
+
             // Material ayarları
             if (obj.material) {
               if ('metalness' in obj.material) {
@@ -106,25 +201,25 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             }
           }
         });
-        
+
         console.log('Yüklenen modeldeki meshler:', meshNames);
-        
+
         // Model boyutunu otomatik ayarla
         const box = new THREE.Box3().setFromObject(this.ringModel);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
-        
+
         // Modeli merkeze al
         this.ringModel.position.sub(center);
-        
+
         // Boyutu normalize et
         const maxSize = Math.max(size.x, size.y, size.z);
         const scale = 2.0 / maxSize; // 1.5 birim hedef boyut
         this.ringModel.scale.setScalar(scale);
-        
+
         // Y ekseninde biraz aşağı kaydır
         this.ringModel.position.y = 0.0;
-        
+
         this.scene.add(this.ringModel);
         console.log('Model sahneye eklendi');
       },
@@ -247,20 +342,20 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.isDragging = true;
     this.startX = event.clientX - this.imageX;
     this.startY = event.clientY - this.imageY;
-    
+
     // Global mouse events for better dragging
     document.addEventListener('mousemove', this.onDocumentMouseMove);
     document.addEventListener('mouseup', this.onDocumentMouseUp);
-    
+
     event.preventDefault();
   }
 
   onImageMouseMove(event: MouseEvent) {
     if (!this.isDragging) return;
-    
+
     this.imageX = event.clientX - this.startX;
     this.imageY = event.clientY - this.startY;
-    
+
   const imageElement = event.target as HTMLElement;
   imageElement.style.setProperty('--tx', this.imageX + 'px');
   imageElement.style.setProperty('--ty', this.imageY + 'px');
@@ -276,11 +371,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   // Global mouse event handlers for better dragging
   private onDocumentMouseMove = (event: MouseEvent) => {
     if (!this.isDragging) return;
-    
+
     // Serbest sürükleme - sınır yok
     this.imageX = event.clientX - this.startX;
     this.imageY = event.clientY - this.startY;
-    
+
     const imageContainer = document.querySelector('.image-container img') as HTMLElement;
     if (imageContainer) {
       imageContainer.style.setProperty('--tx', this.imageX + 'px');
@@ -527,7 +622,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // Resize handling
     this.resizeObserver = new ResizeObserver(() => this.onResize());
     this.resizeObserver.observe(this.threeContainer.nativeElement);
-    
+
     // Eğer seçili item GLB ise ve henüz yüklenmediyse, şimdi yükle
     if (this.isGlb(this.selectedGalleryImage) && !this.ringModel) {
       setTimeout(() => {
@@ -541,13 +636,16 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.controls?.dispose();
     this.renderer?.dispose();
     this.resizeObserver?.disconnect();
+    document.removeEventListener('mousemove', this.onDocumentMouseMove);
+    document.removeEventListener('mouseup', this.onDocumentMouseUp);
+    document.removeEventListener('mousemove', this.onTryOnMouseMove);
+    document.removeEventListener('mouseup', this.onTryOnMouseUp);
   }
 
   private initThree() {
     const container = this.threeContainer.nativeElement;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf6f7fb);
 
     const width = container.clientWidth || 800;
     const height = container.clientHeight || 500;
@@ -555,7 +653,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
     this.camera.position.set(0.6, 0.7, 2.2);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(width, height);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -576,29 +674,29 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
     // Enhanced Controls for better 3D model dragging
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    
+
     // Enable smooth damping for better interaction
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.03;
-    
+
     // Allow panning for better control - SERBEST TAŞIMA
     this.controls.enablePan = true;
     this.controls.panSpeed = 3.0;
-    
+
     // Enable zooming - SERBEST ZOOM
     this.controls.enableZoom = true;
     this.controls.zoomSpeed = 1.5;
-    
+
     // Set rotation limits - SERBEST DÖNME
     this.controls.minDistance = 0.1;
     this.controls.maxDistance = 50.0;
     this.controls.minPolarAngle = 0; // Tam serbest
     this.controls.maxPolarAngle = Math.PI; // Tam serbest
-    
+
     // Enable rotation - SERBEST DÖNME
     this.controls.enableRotate = true;
     this.controls.rotateSpeed = 1.5;
-    
+
     // Mouse button ayarları - TAŞIMA İÇİN
     // Sol tık: döndürme, Sağ tık: taşıma, Orta tık: zoom
     this.controls.mouseButtons = {
@@ -606,21 +704,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       MIDDLE: THREE.MOUSE.DOLLY,
       RIGHT: THREE.MOUSE.PAN
     };
-    
+
     // Touch ayarları - MOBİL İÇİN
     this.controls.touches = {
       ONE: THREE.TOUCH.ROTATE,
       TWO: THREE.TOUCH.DOLLY_PAN
     };
-    
+
     // Klavye desteği - SHIFT+SOL CLICK = TAŞIMA
     this.controls.keys = {
       LEFT: 'ArrowLeft',
-      UP: 'ArrowUp', 
+      UP: 'ArrowUp',
       RIGHT: 'ArrowRight',
       BOTTOM: 'ArrowDown'
     };
-    
+
     // Auto rotate kapalı
     this.controls.autoRotate = false;
     this.controls.autoRotateSpeed = 0;
